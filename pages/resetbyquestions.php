@@ -36,25 +36,18 @@ $userdn = "";
 if (!isset($pwd_forbidden_chars)) { $pwd_forbidden_chars=""; }
 $mail = "";
 
-if (isset($_POST["confirmpassword"]) and $_POST["confirmpassword"]) { $confirmpassword = $_POST["confirmpassword"]; }
+if (isset($_POST["confirmpassword"]) and $_POST["confirmpassword"]) { $confirmpassword = strval($_POST["confirmpassword"]); }
  else { $result = "confirmpasswordrequired"; }
-if (isset($_POST["newpassword"]) and $_POST["newpassword"]) { $newpassword = $_POST["newpassword"]; }
+if (isset($_POST["newpassword"]) and $_POST["newpassword"]) { $newpassword = strval($_POST["newpassword"]); }
   else { $result = "newpasswordrequired"; }
-if (isset($_POST["answer"]) and $_POST["answer"]) { $answer = $_POST["answer"]; }
+if (isset($_POST["answer"]) and $_POST["answer"]) { $answer = strval($_POST["answer"]); }
  else { $result = "answerrequired"; }
-if (isset($_POST["question"]) and $_POST["question"]) { $question = $_POST["question"]; }
+if (isset($_POST["question"]) and $_POST["question"]) { $question = strval($_POST["question"]); }
  else { $result = "questionrequired"; }
-if (isset($_REQUEST["login"]) and $_REQUEST["login"]) { $login = $_REQUEST["login"]; }
+if (isset($_REQUEST["login"]) and $_REQUEST["login"]) { $login = strval($_REQUEST["login"]); }
  else { $result = "loginrequired"; }
 if (! isset($_POST["confirmpassword"]) and ! isset($_POST["newpassword"]) and ! isset($_POST["answer"]) and ! isset($_POST["question"]) and ! isset($_REQUEST["login"]))
  { $result = "emptyresetbyquestionsform"; }
-
-# Strip slashes added by PHP
-$login = stripslashes_if_gpc_magic_quotes($login);
-$question = stripslashes_if_gpc_magic_quotes($question);
-$answer = stripslashes_if_gpc_magic_quotes($answer);
-$newpassword = stripslashes_if_gpc_magic_quotes($newpassword);
-$confirmpassword = stripslashes_if_gpc_magic_quotes($confirmpassword);
 
 # Check the entered username for characters that our installation doesn't support
 if ( $result === "" ) {
@@ -64,18 +57,8 @@ if ( $result === "" ) {
 #==============================================================================
 # Check reCAPTCHA
 #==============================================================================
-if ( $result === "" ) {
-    if ( $use_recaptcha ) {
-        $recaptcha = new \ReCaptcha\ReCaptcha($recaptcha_privatekey);
-        $resp = $recaptcha->verify($_POST['g-recaptcha-response'], $_SERVER['REMOTE_ADDR']);
-        if (!$resp->isSuccess()) {
-            $result = "badcaptcha";
-            error_log("Bad reCAPTCHA attempt with user $login");
-            foreach ($resp->getErrorCodes() as $code) {
-                error_log("reCAPTCHA error: $code");
-            }
-        }
-    }
+if ( $result === "" && $use_recaptcha ) {
+    $result = check_recaptcha($recaptcha_privatekey, $recaptcha_request_method, $_POST['g-recaptcha-response'], $login);
 }
 
 #==============================================================================
@@ -99,12 +82,14 @@ if ( $result === "" ) {
         $bind = ldap_bind($ldap);
     }
 
-    $errno = ldap_errno($ldap);
-    if ( $errno ) {
+    if ( !$bind ) {
         $result = "ldaperror";
-        error_log("LDAP - Bind error $errno (".ldap_error($ldap).")");
+        $errno = ldap_errno($ldap);
+        if ( $errno ) {
+            error_log("LDAP - Bind error $errno  (".ldap_error($ldap).")");
+        }
     } else {
-    
+
     # Search for user
     $ldap_filter = str_replace("{login}", $login, $ldap_filter);
     $search = ldap_search($ldap, $ldap_base, $ldap_filter);
@@ -145,13 +130,18 @@ if ( $result === "" ) {
     # Get question/answer values
     $questionValues = ldap_get_values($ldap, $entry, $answer_attribute);
     unset($questionValues["count"]);
-    $match = 0;
+
+    $match = false;
+
+    $question = preg_quote($question,'/');
+    $answer   = preg_quote($answer,'/');
+    $pattern  = "/^\{$question\}$answer$/i";
 
     # Match with user submitted values
     foreach ($questionValues as $questionValue) {
-        $answer = preg_quote("$answer","/");
-        if (preg_match("/^\{$question\}$answer$/i", $questionValue)) {
-            $match = 1;
+        $value = $crypt_answers ? decrypt($questionValue, $keyphrase) : $questionValue;
+        if (preg_match($pattern, $value)) {
+            $match = true;
         }
     }
 
@@ -179,19 +169,28 @@ if ( $result === "" ) {
 if ($result === "") {
     $result = change_password($ldap, $userdn, $newpassword, $ad_mode, $ad_options, $samba_mode, $samba_options, $shadow_options, $hash, $hash_options, "", "");
     if ( $result === "passwordchanged" && isset($posthook) ) {
-        $command = escapeshellcmd($posthook).' '.escapeshellarg($login).' '.escapeshellarg($newpassword);
-        exec($command);
+        $command = posthook_command($posthook, $login, $newpassword, null, $posthook_password_encodebase64);
+        exec($command, $posthook_output, $posthook_return);
     }
 }
 
 #==============================================================================
 # HTML
 #==============================================================================
+if ( in_array($result, array($obscure_failure_messages)) ) { $result = "badcredentials"; }
 ?>
 
 <div class="result alert alert-<?php echo get_criticity($result) ?>">
 <p><i class="fa fa-fw <?php echo get_fa_class($result) ?>" aria-hidden="true"></i> <?php echo $messages[$result]; ?></p>
 </div>
+
+<?php if ( $display_posthook_error and $posthook_return > 0 ) { ?>
+
+<div class="result alert alert-warning">
+<p><i class="fa fa-fw fa-exclamation-triangle" aria-hidden="true"></i> <?php echo $posthook_output[0]; ?></p>
+</div>
+
+<?php } ?>
 
 <?php if ( $result !== "passwordchanged" ) { ?>
 
@@ -242,7 +241,7 @@ foreach ( $messages["questions"] as $value => $text ) {
         <div class="col-sm-8">
             <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-fw fa-pencil"></i></span>
-                <input type="text" name="answer" id="answer" class="form-control" placeholder="<?php echo $messages["answer"]; ?>" />
+                <input type="text" name="answer" id="answer" class="form-control" placeholder="<?php echo $messages["answer"]; ?>" autocomplete="off" />
             </div>
         </div>
     </div>

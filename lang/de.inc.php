@@ -25,6 +25,7 @@
 $messages['phpupgraderequired'] = "PHP upgrade required";
 $messages['nophpldap'] = "Sie benötigen die PHP LDAP Erweiterung um dieses Tool zu nutzen";
 $messages['nophpmhash'] = "Sie benötigen die PHP mhash Erweiterung um den Samba Modus zu nutzen";
+$messages['nokeyphrase'] = "Token encryption requires a random string in keyphrase setting";
 $messages['ldaperror'] = "Kein Zugriff auf das LDAP möglich";
 $messages['loginrequired'] = "Ihr Login wird benötigt";
 $messages['oldpasswordrequired'] = "Ihr altes Passwort wird benötigt";
@@ -77,7 +78,8 @@ $messages['changehelptoken'] = "<a href=\"?action=sendtoken\">Rücksetzen Ihres 
 $messages['changehelpsms'] = "<a href=\"?action=sendsms\">Rücksetzen Ihres Passworts per SMS</a>";
 $messages['resetmessage'] = "Hallo {login},\n\nKlicken Sie hier um Ihr Passwort zurückzusetzen:\n{url}\n\nFalls Sie keine Rücksetzung beantragt haben, ignorieren Sie dies bitte.";
 $messages['resetsubject'] = "Setzen Sie Ihr Passwort zurück";
-$messages['sendtokenhelp'] = "Geben Sie Ihren Benutzernamen ein um Ihr Passwort zurückzusetzen. Danach klicken Sie auf den Link in der gesendeten Mail.";
+$messages['sendtokenhelp'] = "Geben Sie Ihren Benutzernamen und Email-Adresse ein um Ihr Passwort zurückzusetzen. Danach klicken Sie auf den Link in der gesendeten Mail.";
+$messages['sendtokenhelpnomail'] = "Geben Sie Ihren Benutzernamen ein um Ihr Passwort zurückzusetzen. Danach klicken Sie auf den Link in der gesendeten Mail.";
 $messages['mail'] = "Mail";
 $messages['mailrequired'] = "Ihre Email-Adresse wird benötigt";
 $messages['mailnomatch'] = "Die Mail entspricht nicht dem übermittelten Benutzernamen";
@@ -119,5 +121,15 @@ $messages['emptysetquestionsform'] = "Wählen Sie Ihre Sicherheitsfrage";
 $messages['emptysendsmsform'] = "Erhalte einen Reset-Code";
 $messages['sameaslogin'] = "Ihr neues Passwort ist identisch mit Ihrem Loginnamen";
 $messages['policydifflogin'] = "Ihr neues Passwort darf nicht dasselbe wie Ihr Loginname";
-
-?>
+$messages['changesshkeyhelp'] = "Geben Sie Ihr Passwort und den neuen SSH-Schlüssel ein.";
+$messages['sshkeyerror'] = "SSH-Schlüssel wurde durch das LDAP-Verzeichnis abgelehnt";
+$messages['changehelpsshkey'] = "<a href=\"?action=changesshkey\">Ändern Sie Ihren SSH-Schlüssel</a>";
+$messages['sshkeyrequired'] = "SSH-Schlüssel ist erforderlich";
+$messages['sshkey'] = "SSH Schlüssel";
+$messages['sshkeychanged'] = "Ihr SSH Key wurde geändert";
+$messages['emptysshkeychangeform'] = "Ändern Sie Ihren SSH-Schlüssel";
+$messages['changesshkeymessage'] = "Hallo {login}, \n\nDer SSH-Schlüssel wurde geändert.\n\nWenn Sie diese Änderung nicht eingeleitet haben, wenden Sie sich bitte umgehend an Ihren Administrator.";
+$messages['menusshkey'] = "SSH Schlüssel";
+$messages['changesshkeysubject'] = "Ihr SSH-Schlüssel wurde geändert";
+$messages['pwned'] = "Your new password has already been published on leaks, you should consider changing it on any other service that it is in use";
+$messages['policypwned'] = "Your new password may not be published on any previous public password leak from any site";

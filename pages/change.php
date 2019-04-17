@@ -35,22 +35,16 @@ $userdn = "";
 if (!isset($pwd_forbidden_chars)) { $pwd_forbidden_chars=""; }
 $mail = "";
 
-if (isset($_POST["confirmpassword"]) and $_POST["confirmpassword"]) { $confirmpassword = $_POST["confirmpassword"]; }
+if (isset($_POST["confirmpassword"]) and $_POST["confirmpassword"]) { $confirmpassword = strval($_POST["confirmpassword"]); }
  else { $result = "confirmpasswordrequired"; }
-if (isset($_POST["newpassword"]) and $_POST["newpassword"]) { $newpassword = $_POST["newpassword"]; }
+if (isset($_POST["newpassword"]) and $_POST["newpassword"]) { $newpassword = strval($_POST["newpassword"]); }
  else { $result = "newpasswordrequired"; }
-if (isset($_POST["oldpassword"]) and $_POST["oldpassword"]) { $oldpassword = $_POST["oldpassword"]; }
+if (isset($_POST["oldpassword"]) and $_POST["oldpassword"]) { $oldpassword = strval($_POST["oldpassword"]); }
  else { $result = "oldpasswordrequired"; }
-if (isset($_REQUEST["login"]) and $_REQUEST["login"]) { $login = $_REQUEST["login"]; }
+if (isset($_REQUEST["login"]) and $_REQUEST["login"]) { $login = strval($_REQUEST["login"]); }
  else { $result = "loginrequired"; }
 if (! isset($_REQUEST["login"]) and ! isset($_POST["confirmpassword"]) and ! isset($_POST["newpassword"]) and ! isset($_POST["oldpassword"]))
  { $result = "emptychangeform"; }
-
-# Strip slashes added by PHP
-$login = stripslashes_if_gpc_magic_quotes($login);
-$oldpassword = stripslashes_if_gpc_magic_quotes($oldpassword);
-$newpassword = stripslashes_if_gpc_magic_quotes($newpassword);
-$confirmpassword = stripslashes_if_gpc_magic_quotes($confirmpassword);
 
 # Check the entered username for characters that our installation doesn't support
 if ( $result === "" ) {
@@ -63,18 +57,8 @@ if ( $newpassword != $confirmpassword ) { $result="nomatch"; }
 #==============================================================================
 # Check reCAPTCHA
 #==============================================================================
-if ( $result === "" ) {
-    if ( $use_recaptcha) {
-        $recaptcha = new \ReCaptcha\ReCaptcha($recaptcha_privatekey);
-        $resp = $recaptcha->verify($_POST['g-recaptcha-response'], $_SERVER['REMOTE_ADDR']);
-        if (!$resp->isSuccess()) {
-            $result = "badcaptcha";
-            error_log("Bad reCAPTCHA attempt with user $login");
-            foreach ($resp->getErrorCodes() as $code) {
-                error_log("reCAPTCHA error: $code");
-            }
-        }
-    }
+if ( $result === "" && $use_recaptcha ) {
+    $result = check_recaptcha($recaptcha_privatekey, $recaptcha_request_method, $_POST['g-recaptcha-response'], $login);
 }
 
 #==============================================================================
@@ -98,12 +82,14 @@ if ( $result === "" ) {
         $bind = ldap_bind($ldap);
     }
 
-    $errno = ldap_errno($ldap);
-    if ( $errno ) {
+    if ( !$bind ) {
         $result = "ldaperror";
-        error_log("LDAP - Bind error $errno  (".ldap_error($ldap).")");
+        $errno = ldap_errno($ldap);
+        if ( $errno ) {
+	    error_log("LDAP - Bind error $errno  (".ldap_error($ldap).")");
+        }
     } else {
-    
+
     # Search for user
     $ldap_filter = str_replace("{login}", $login, $ldap_filter);
     $search = ldap_search($ldap, $ldap_base, $ldap_filter);
@@ -122,7 +108,7 @@ if ( $result === "" ) {
         $result = "badcredentials";
         error_log("LDAP - User $login not found");
     } else {
-    
+
     # Get user email for notification
     if ( $notify_on_change ) {
         $mailValues = ldap_get_values($ldap, $entry, $mail_attribute);
@@ -143,31 +129,34 @@ if ( $result === "" ) {
 
     # Bind with old password
     $bind = ldap_bind($ldap, $userdn, $oldpassword);
-    $errno = ldap_errno($ldap);
-    if ( ($errno == 49) && $ad_mode ) {
-        if ( ldap_get_option($ldap, 0x0032, $extended_error) ) {
-            error_log("LDAP - Bind user extended_error $extended_error  (".ldap_error($ldap).")");
-            $extended_error = explode(', ', $extended_error);
-            if ( strpos($extended_error[2], '773') or strpos($extended_error[0], 'NT_STATUS_PASSWORD_MUST_CHANGE') ) {
-                error_log("LDAP - Bind user password needs to be changed");
-                $errno = 0;
+    if ( !$bind ) {
+        $result = "badcredentials";
+        $errno = ldap_errno($ldap);
+        if ( $errno ) {
+            error_log("LDAP - Bind user error $errno  (".ldap_error($ldap).")");
+        }
+        if ( ($errno == 49) && $ad_mode ) {
+            if ( ldap_get_option($ldap, 0x0032, $extended_error) ) {
+                error_log("LDAP - Bind user extended_error $extended_error  (".ldap_error($ldap).")");
+                $extended_error = explode(', ', $extended_error);
+                if ( strpos($extended_error[2], '773') or strpos($extended_error[0], 'NT_STATUS_PASSWORD_MUST_CHANGE') ) {
+                    error_log("LDAP - Bind user password needs to be changed");
+                    $result = "";
+                }
+                if ( ( strpos($extended_error[2], '532') or strpos($extended_error[0], 'NT_STATUS_ACCOUNT_EXPIRED') ) and $ad_options['change_expired_password'] ) {
+                    error_log("LDAP - Bind user password is expired");
+                    $result = "";
+                }
+                unset($extended_error);
             }
-            if ( ( strpos($extended_error[2], '532') or strpos($extended_error[0], 'NT_STATUS_ACCOUNT_EXPIRED') ) and $ad_options['change_expired_password'] ) {
-                error_log("LDAP - Bind user password is expired");
-                $errno = 0;
-            }
-            unset($extended_error);
         }
     }
-    if ( $errno ) {
-        $result = "badcredentials";
-        error_log("LDAP - Bind user error $errno  (".ldap_error($ldap).")");
-    } else {
+    if ( $result === "" )  {
 
-    # Rebind as Manager if needed
-    if ( $who_change_password == "manager" ) {
-        $bind = ldap_bind($ldap, $ldap_binddn, $ldap_bindpw);
-    }
+        # Rebind as Manager if needed
+        if ( $who_change_password == "manager" ) {
+            $bind = ldap_bind($ldap, $ldap_binddn, $ldap_bindpw);
+        }
 
     }}}}}
 
@@ -180,26 +169,34 @@ if ( $result === "" ) {
     $result = check_password_strength( $newpassword, $oldpassword, $pwd_policy_config, $login );
 }
 
-
 #==============================================================================
 # Change password
 #==============================================================================
 if ( $result === "" ) {
     $result = change_password($ldap, $userdn, $newpassword, $ad_mode, $ad_options, $samba_mode, $samba_options, $shadow_options, $hash, $hash_options, $who_change_password, $oldpassword);
     if ( $result === "passwordchanged" && isset($posthook) ) {
-        $command = escapeshellcmd($posthook).' '.escapeshellarg($login).' '.escapeshellarg($newpassword).' '.escapeshellarg($oldpassword);
-        exec($command);
+        $command = posthook_command($posthook, $login, $newpassword, $oldpassword, $posthook_password_encodebase64);
+        exec($command, $posthook_output, $posthook_return);
     }
 }
 
 #==============================================================================
 # HTML
 #==============================================================================
+if ( in_array($result, array($obscure_failure_messages)) ) { $result = "badcredentials"; }
 ?>
 
 <div class="result alert alert-<?php echo get_criticity($result) ?>">
 <p><i class="fa fa-fw <?php echo get_fa_class($result) ?>" aria-hidden="true"></i> <?php echo $messages[$result]; ?></p>
 </div>
+
+<?php if ( isset($posthook_return) and $display_posthook_error and $posthook_return > 0 ) { ?>
+
+<div class="result alert alert-warning">
+<p><i class="fa fa-fw fa-exclamation-triangle" aria-hidden="true"></i> <?php echo $posthook_output[0]; ?></p>
+</div>
+
+<?php } ?>
 
 <?php if ( $result !== "passwordchanged" ) { ?>
 
@@ -212,7 +209,7 @@ if ( $show_help ) {
     if (isset($messages['changehelpextramessage'])) {
         echo "<p>" . $messages['changehelpextramessage'] . "</p>";
     }
-    if ( !$show_menu and ( $use_questions or $use_tokens or $use_sms ) ) {
+    if ( !$show_menu and ( $use_questions or $use_tokens or $use_sms or $change_sshkey ) ) {
         echo "<p>".  $messages["changehelpreset"] . "</p>";
         echo "<ul>";
         if ( $use_questions ) {
@@ -223,6 +220,9 @@ if ( $show_help ) {
         }
         if ( $use_sms ) {
             echo "<li>" . $messages["changehelpsms"] ."</li>";
+        }
+        if ( $change_sshkey ) {
+            echo "<li>" . $messages["changehelpsshkey"] . "</li>";
         }
         echo "</ul>";
     }

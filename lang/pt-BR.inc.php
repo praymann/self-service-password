@@ -22,9 +22,10 @@
 #==============================================================================
 # Pt-BR
 #==============================================================================
-$messages['phpupgraderequired'] = "PHP upgrade required";
+$messages['phpupgraderequired'] = "O seu PHP necessita de upgrade";
 $messages['nophpldap'] = "Você deve instalar o PHP LDAP para utilizar esta ferramenta";
 $messages['nophpmhash'] = "Você deve instalar o PHP mhash para utilizar o Samba mode";
+$messages['nokeyphrase'] = "Criptografia do Token necessita de uma string aleatória nas configuração de keyphrase";
 $messages['ldaperror'] = "Não foi possível acessar o diretório LDAP";
 $messages['loginrequired'] = "O seu login é necessário";
 $messages['oldpasswordrequired'] = "A senha atual é necessária";
@@ -76,7 +77,8 @@ $messages['changehelpquestions'] = "<a href=\"?action=resetbyquestions\">Redefin
 $messages['changehelptoken'] = "<a href=\"?action=sendtoken\">Redefina sua senha através do e-mail</a>";
 $messages['resetmessage'] = "Olá {login},\n\nClique aqui para redefinir sua senha:\n{url}\n\nSe você não tem certeza desta requisição, por favor, ignore este e-mail.";
 $messages['resetsubject'] = "Redefina sua senha";
-$messages['sendtokenhelp'] = "Entre com o seu login e senha para redefinir sua senha. Em seguida clique no link enviado pelo e-mail.";
+$messages['sendtokenhelp'] = "Entre com o seu login e e-mail para redefinir sua senha. Em seguida clique no link enviado pelo e-mail.";
+$messages['sendtokenhelpnomail'] = "Entre com o seu login para redefinir sua senha. Em seguida clique no link enviado pelo e-mail.";
 $messages['mail'] = "E-mail";
 $messages['mailrequired'] = "O e-mail é necessário";
 $messages['mailnomatch'] = "O e-mail não coincide com nenhum usuário";
@@ -101,21 +103,31 @@ $messages['username'] = "Nome";
 $messages['smscrypttokensrequired'] = "Você não pode utilizar redefinição via SMS sem a configuração crypt_tokens";
 $messages['smsuserfound'] = "Verifique se as informações do usuário estão corretas e pressione Enviar para obter o código SMS";
 $messages['smstoken'] = "Código SMS";
-$messages['changehelpsms'] = "<a href=\"?action=sendsms\">Reset your password with a SMS</a>";
-$messages['getuser'] = "Get user";
-$messages['resetbysmshelp'] = "The token sent by sms allows you to reset your password. To get a new token, <a href=\"?action=sendsms\">click here</a>.";
+$messages['changehelpsms'] = "<a href=\"?action=sendsms\">Altere sua senha com SMS</a>";
+$messages['getuser'] = "Esqueci usuário";
+$messages['resetbysmshelp'] = "O token enviado por sms permite você alterar sua senha. Para recer um novo token, <a href=\"?action=sendsms\">clique aqui</a>.";
 $messages['nophpmbstring'] = "Você deve instalar a biblioteca PHP mbstring";
 $messages['menuquestions'] = "Pergunta";
 $messages['menutoken'] = "E-mail";
 $messages['menusms'] = "SMS";
 $messages['nophpxml'] = "Você deve instalar o PHP XML para utilizar esta ferramenta";
-$messages['tokenattempts'] = "Invalid token, try again";
-$messages['emptychangeform'] = "Change your password";
-$messages['emptysendtokenform'] = "Email a password reset link";
-$messages['emptyresetbyquestionsform'] = "Reset your password";
-$messages['emptysetquestionsform'] = "Set your password reset questions";
-$messages['emptysendsmsform'] = "Get a reset code";
-$messages['sameaslogin'] = "Your new password is identical to your login";
-$messages['policydifflogin'] = "Your new password may not be the same as your login";
-
-?>
+$messages['tokenattempts'] = "Token inválido, tente novamente";
+$messages['emptychangeform'] = "Altere sua senha";
+$messages['emptysendtokenform'] = "Envie um link para alteração de senha";
+$messages['emptyresetbyquestionsform'] = "Altere sua senha";
+$messages['emptysetquestionsform'] = "Defina suas questões para alteração de senha";
+$messages['emptysendsmsform'] = "Receba um código para alteração de senha";
+$messages['sameaslogin'] = "Sua nova senha é idêntica ao seu login";
+$messages['policydifflogin'] = "Sua nova senha não pode ser igual ao seu login";
+$messages['changesshkeymessage'] = "Olá {login},\n\nSua chave SSH Key foi alterada.\n\nSe você não solicitou esta troca, por favor contact seu administrador imediatamente..";
+$messages['menusshkey'] = "Chave SSH";
+$messages['changehelpsshkey'] = "<a href=\"?action=changesshkey\">Alterar a chave SSH</a>";
+$messages['sshkeychanged'] = "Sua chave SSH foi alterada";
+$messages['sshkeyrequired'] = "A chave SSH é necessária";
+$messages['changesshkeysubject'] = "Sua chave SSH foi alterada";
+$messages['sshkey'] = "Chave SSH";
+$messages['emptysshkeychangeform'] = "Alterar a chave SSH";
+$messages['changesshkeyhelp'] = "Digite sua senha e a nova chave SSH.";
+$messages['sshkeyerror'] = "A chave SSH foi recusada pelo diretório LDAP";
+$messages['pwned'] = "Sua nova senha já foi publicada como vazada, você deveria alterá-la em qualquer outro site que a utilize.";
+$messages['policypwned'] = "Parece que sua nova senha não foi publicada como vazada de qualquer site";

@@ -36,7 +36,7 @@ $userdn = "";
 if (!isset($pwd_forbidden_chars)) { $pwd_forbidden_chars=""; }
 $mail = "";
 
-if (isset($_REQUEST["token"]) and $_REQUEST["token"]) { $token = $_REQUEST["token"]; }
+if (isset($_REQUEST["token"]) and $_REQUEST["token"]) { $token = strval($_REQUEST["token"]); }
  else { $result = "tokenrequired"; }
 
 #==============================================================================
@@ -91,27 +91,13 @@ if ( $result === "" ) {
      else { $result = "confirmpasswordrequired"; }
     if (isset($_POST["newpassword"]) and $_POST["newpassword"]) { $newpassword = $_POST["newpassword"]; }
      else { $result = "newpasswordrequired"; }
-
-    # Strip slashes added by PHP
-    $newpassword = stripslashes_if_gpc_magic_quotes($newpassword);
-    $confirmpassword = stripslashes_if_gpc_magic_quotes($confirmpassword);
 }
 
 #==============================================================================
 # Check reCAPTCHA
 #==============================================================================
-if ( $result === "" ) {
-    if ( $use_recaptcha ) {
-        $recaptcha = new \ReCaptcha\ReCaptcha($recaptcha_privatekey);
-        $resp = $recaptcha->verify($_POST['g-recaptcha-response'], $_SERVER['REMOTE_ADDR']);
-        if (!$resp->isSuccess()) {
-            $result = "badcaptcha";
-            error_log("Bad reCAPTCHA attempt with user $login");
-            foreach ($resp->getErrorCodes() as $code) {
-                error_log("reCAPTCHA error: $code");
-            }
-        }
-    }
+if ( $result === "" && $use_recaptcha ) {
+    $result = check_recaptcha($recaptcha_privatekey, $recaptcha_request_method, $_POST['g-recaptcha-response'], $login);
 }
 
 #==============================================================================
@@ -135,10 +121,12 @@ if ( $result === "" ) {
         $bind = ldap_bind($ldap);
     }
 
-    $errno = ldap_errno($ldap);
-    if ( $errno ) {
+    if ( !$bind ) {
         $result = "ldaperror";
-        error_log("LDAP - Bind error $errno (".ldap_error($ldap).")");
+        $errno = ldap_errno($ldap);
+        if ( $errno ) {
+            error_log("LDAP - Bind error $errno  (".ldap_error($ldap).")");
+        }
     } else {
 
     # Search for user
@@ -197,8 +185,8 @@ if ( $result === "" ) {
 if ($result === "") {
     $result = change_password($ldap, $userdn, $newpassword, $ad_mode, $ad_options, $samba_mode, $samba_options, $shadow_options, $hash, $hash_options, "", "");
     if ( $result === "passwordchanged" && isset($posthook) ) {
-        $command = escapeshellcmd($posthook).' '.escapeshellarg($login).' '.escapeshellarg($newpassword);
-        exec($command);
+        $command = posthook_command($posthook, $login, $newpassword, null, $posthook_password_encodebase64);
+        exec($command, $posthook_output, $posthook_return);
     }
 }
 
@@ -211,11 +199,20 @@ if ( $result === "passwordchanged" ) {
 #==============================================================================
 # HTML
 #==============================================================================
+if ( in_array($result, array($obscure_failure_messages)) ) { $result = "badcredentials"; }
 ?>
 
 <div class="result alert alert-<?php echo get_criticity($result) ?>">
 <p><i class="fa fa-fw <?php echo get_fa_class($result) ?>" aria-hidden="true"></i> <?php echo $messages[$result]; ?></p>
 </div>
+
+<?php if ( $display_posthook_error and $posthook_return > 0 ) { ?>
+
+<div class="result alert alert-warning">
+<p><i class="fa fa-fw fa-exclamation-triangle" aria-hidden="true"></i> <?php echo $posthook_output[0]; ?></p>
+</div>
+
+<?php } ?>
 
 <?php if ( $result !== "passwordchanged" ) { ?>
 

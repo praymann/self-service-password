@@ -19,6 +19,8 @@
 #
 #==============================================================================
 
+ob_start();
+
 #==============================================================================
 # Includes
 #==============================================================================
@@ -30,6 +32,19 @@ if ($use_recaptcha) {
 }
 require_once("lib/detectbrowserlanguage.php");
 require_once("lib/vendor/PHPMailer/PHPMailerAutoload.php");
+if ($use_pwnedpasswords) {
+    require_once("lib/vendor/ron-maxweb/pwned-passwords/src/PwnedPasswords/PwnedPasswords.php");
+}
+
+#==============================================================================
+# Error reporting
+#==============================================================================
+error_reporting(0);
+if($debug) {
+    error_reporting(E_ALL);
+    // Important to get error details in case of SSL/TLS failure at connection
+    ldap_set_option(NULL, LDAP_OPT_DEBUG_LEVEL, 7);
+}
 
 #==============================================================================
 # Language
@@ -38,8 +53,13 @@ require_once("lib/vendor/PHPMailer/PHPMailerAutoload.php");
 $languages = array();
 if ($handle = opendir('lang')) {
     while (false !== ($entry = readdir($handle))) {
-        if ($entry != "." && $entry != "..") {
-             array_push($languages, str_replace(".inc.php", "", $entry));
+        if ( preg_match('/\.inc\.php$/', $entry) ) {
+            $entry_lang = str_replace(".inc.php", "", $entry);
+            # Only add language to possibilities if it is the default language or part of the allowed languages
+            # empty $allowed_lang <=> all languages are allowed
+            if ($entry_lang == $lang || empty($allowed_lang) || in_array($entry_lang, $allowed_lang) ) {
+                array_push($languages, $entry_lang);
+            }
         }
     }
     closedir($handle);
@@ -49,18 +69,6 @@ require_once("lang/$lang.inc.php");
 if (file_exists("conf/$lang.inc.php")) {
     require_once("conf/$lang.inc.php");
 }
-
-#==============================================================================
-# Error reporting
-#==============================================================================
-error_reporting(0);
-if($debug) error_reporting(E_ALL);
-
-#==============================================================================
-# PHP configuration tuning
-#==============================================================================
-# Disable output_buffering, to not send cookie information after headers
-ini_set('output_buffering', '0');
 
 #==============================================================================
 # PHP modules
@@ -84,6 +92,8 @@ if ( ! function_exists('mb_internal_encoding') ) { $dependency_check_results[] =
 # Check PHP xml presence
 if ( ! function_exists('utf8_decode') ) { $dependency_check_results[] = "nophpxml"; }
 
+# Check keyphrase setting
+if ( ( ( $use_tokens and $crypt_tokens ) or $use_sms or $crypt_answers ) and ( empty($keyphrase) or $keyphrase == "secret") ) { $dependency_check_results[] = "nokeyphrase"; }
 #==============================================================================
 # Action
 #==============================================================================
@@ -94,6 +104,7 @@ else { $action = $default_action; }
 # Available actions
 $available_actions = array();
 if ( $use_change ) { array_push( $available_actions, "change"); }
+if ( $change_sshkey ) { array_push( $available_actions, "changesshkey"); }
 if ( $use_questions ) { array_push( $available_actions, "resetbyquestions", "setquestions"); }
 if ( $use_tokens ) { array_push( $available_actions, "resetbytoken", "sendtoken"); }
 if ( $use_sms ) { array_push( $available_actions, "resetbytoken", "sendsms"); }
@@ -103,6 +114,7 @@ if ( ! in_array($action, $available_actions) ) { $action = $default_action; }
 
 # Get source for menu
 if (isset($_REQUEST["source"]) and $_REQUEST["source"]) { $source = $_REQUEST["source"]; }
+else { $source="unknown"; }
 
 #==============================================================================
 # Other default values
@@ -127,7 +139,8 @@ $pwd_policy_config = array(
     "pwd_forbidden_chars"     => $pwd_forbidden_chars,
     "pwd_no_reuse"            => $pwd_no_reuse,
     "pwd_diff_login"          => $pwd_diff_login,
-    "pwd_complexity"          => $pwd_complexity
+    "pwd_complexity"          => $pwd_complexity,
+    "use_pwnedpasswords"      => $use_pwnedpasswords
 );
 
 if (!isset($pwd_show_policy_pos)) { $pwd_show_policy_pos = "above"; }
@@ -147,6 +160,7 @@ $mailer->Debugoutput   = $mail_debug_format;
 $mailer->Host          = $mail_smtp_host;
 $mailer->Port          = $mail_smtp_port;
 $mailer->SMTPSecure    = $mail_smtp_secure;
+$mailer->SMTPAutoTLS   = $mail_smtp_autotls;
 $mailer->SMTPAuth      = $mail_smtp_auth;
 $mailer->Username      = $mail_smtp_user;
 $mailer->Password      = $mail_smtp_pass;
@@ -217,8 +231,20 @@ $mailer->LE            = $mail_newline;
 
 </div>
 
-<script src="js/jquery-1.10.2.min.js"></script>
+<script src="js/jquery-3.3.1.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
-
+<script>
+    $(document).ready(function(){
+        // Menu links popovers
+        $('[data-toggle="menu-popover"]').popover({
+            trigger: 'hover',
+            placement: 'bottom',
+            container: 'body' // Allows the popover to be larger than the menu button
+        });
+    });
+</script>
 </body>
 </html>
+<?php
+
+ob_end_flush();

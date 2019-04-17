@@ -14,7 +14,7 @@
 #=================================================
 %define ssp_name	self-service-password
 %define ssp_realname	ltb-project-%{name}
-%define ssp_version	1.0
+%define ssp_version	1.3
 %define ssp_destdir     /usr/share/%{name}
 
 #=================================================
@@ -23,7 +23,7 @@
 Summary: LDAP password change web interface
 Name: %{ssp_name}
 Version: %{ssp_version}
-Release: 2%{?dist}
+Release: 1%{?dist}
 License: GPL
 BuildArch: noarch
 
@@ -34,7 +34,7 @@ Source: %{ssp_realname}-%{ssp_version}.tar.gz
 Source1: self-service-password-apache.conf
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-Prereq: coreutils
+Requires(pre): coreutils
 Requires: php, php-ldap, php-mbstring
 
 %description
@@ -63,6 +63,7 @@ mkdir -p %{buildroot}/%{ssp_destdir}/js
 mkdir -p %{buildroot}/%{ssp_destdir}/lang
 mkdir -p %{buildroot}/%{ssp_destdir}/lib
 mkdir -p %{buildroot}/%{ssp_destdir}/pages
+mkdir -p %{buildroot}/%{ssp_destdir}/scripts
 mkdir -p %{buildroot}/etc/httpd/conf.d
 
 # Copy files
@@ -77,6 +78,7 @@ install -m 644 lang/*    %{buildroot}/%{ssp_destdir}/lang
 install -m 644 lib/*.php %{buildroot}/%{ssp_destdir}/lib
 cp -a lib/vendor         %{buildroot}/%{ssp_destdir}/lib
 install -m 644 pages/*   %{buildroot}/%{ssp_destdir}/pages
+install -m 644 scripts/* %{buildroot}/%{ssp_destdir}/scripts
 ## Apache configuration
 install -m 644 %{SOURCE1} %{buildroot}/etc/httpd/conf.d/self-service-password.conf
 
@@ -112,6 +114,101 @@ rm -rf %{buildroot}
 # Changelog
 #=================================================
 %changelog
+* Tue Jul 10 2018 - Clement Oudot <clem@ltb-project.org> - 1.3-1
+- gh#182: Message incorrect when resetting using email but not supplying email (minor)
+- gh#187: Security assessment issues
+- gh#191: Minor changes to Spanish translation
+- gh#196: reduce info released in error messages
+- gh#197: Please wrap mail debug ouput in <pre> tags.
+- gh#198: Create ee.inc.php
+- gh#201: Added some translations
+- gh#202: include config.inc.local.php + warning
+- gh#204: Index includes .swp files and crashes sites with error 500
+- gh#206: Encrypt answers in directory
+- gh#209: Check ldap_bind return code instead of relying on ldap_errno
+- gh#210: SSH key change should not be permitted for expired or must change passwords
+- gh#211: Force string conversion of input values
+- gh#215: added support for pwned-passwords api v2
+- gh#217: take into account post-hook exit status
+* Fri Jan 12 2018 - Clement Oudot <clem@ltb-project.org> - 1.2-1
+- gh#149: Remove obsolete stripslashes_if_gpc_magic_quotes
+- gh#154: Translated the hungarian keys left in english.
+- gh#162: Resolve send token web page issue when E-Mail To: set from LDAP
+- gh#166: Opportunistic TLS problem
+- gh#174: Improved nl.lang.php
+- gh#175: reCAPTCHA not working on master
+- gh#176: Dutch translation update by AlbertPluton
+- gh#177: Fix "SSH Key required" message wrong color when ssh key is not submitted
+- gh#178: Fix pattern matching in reset by questions
+- gh#179: Revert Twig because of multiple regressions, work still needed, and lack of testing
+* Fri Sep 01 2017 - Clement Oudot <clem@ltb-project.org> - 1.1-1
+- gh#33: Posthook does not work with apostrophes
+- gh#38: Add Japanese translation
+- gh#40: Add missing variable $mail_wordwrap in config.inc.php
+- gh#41: Show all missing dependencies instead of one and fix color of message
+- gh#42: Fix $mail_sendmailpath in config was ignored because of a typo
+- gh#43: Fix bad link in hungarian translation
+- gh#47: Allow for longer salts
+- gh#48: Corrections proposed to index.php and pages/* files
+- gh#49: Fix the usage of rand instead of mt_rand
+- gh#50: Use fixed width icons
+- gh#51: Apache configuration in RPM package
+- gh#54: Reset password layout
+- gh#55: shadowExpire in LDAP
+- gh#58: Escape shell args with escapeshellarg for posthook command (fixes #33)
+- gh#59: Weak entropy for password generation
+- gh#60: Encryption without authentication
+- gh#61: Greek translation
+- gh#63: German translation
+- gh#64: Mail from ldap
+- gh#65: Mail signature
+- gh#66: Get Mail from LDAP
+- gh#67: Mail signature
+- gh#68: Swedish translation
+- gh#73: Dependency check for function ldap_modify_batch()
+- gh#74: session token with nginx
+- gh#75: SHA512 in password encryption
+- gh#76: Fixing Czech translation
+- gh#77: Improved IT translation
+- gh#78: Allow sending SMS through web-based API instead of Email2SMS Gateway
+- gh#79: Improved ES translation
+- gh#81: Allow self service of sshPublicKey attribute in LDAP
+- gh#82: PHPMailer security update
+- gh#85: mcrypt is outdated
+- gh#87: Get Travis tests working again on PHP 7
+- gh#89: Erreurs de Francais
+- gh#90: Update fr.inc.php
+- gh#91: Can email reset use AD user's FirstName, instead of login ID?
+- gh#92: Implements strong cryptography with defuse-crypto 2.0.3
+- gh#93: Add SHA512 password hashing
+- gh#94: Update phpmailer from v5.2.16 to v5.5.23
+- gh#95: Dependency check for function ldap_modify_batch()
+- gh#97: Add an easy way to override messages
+- gh#98: Bug in resetbytoken.php
+- gh#99: Force use of phpunit 5.7 if php >= 7.0 for travis testing
+- gh#100: Fixes for things pointed out after #81 was merged
+- gh#102: Fix for base64 encoded strings that contain '+'
+- gh#104: Fix invalid html in sendsms.php
+- gh#105: SSHKey update  Insufficient access
+- gh#106: Update zh-CN translation
+- gh#107: Sanitize Mobile Number retrieved from LDAP
+- gh#111: "Email" name in menu is confusing
+- gh#115: Force specific language?
+- gh#116: Add possibility to force use of a specific set of languages
+- gh#117: SSHA-256 support for ldap user password
+- gh#118: Fix hhvm on travis, update travis config
+- gh#120: Fix debian packages/repository for debian stretch
+- gh#121: Add popovers to explain menu links (cf. issue #111)
+- gh#126: proxy support for ReCaptcha
+- gh#128: Reset token validation issue
+- gh#130: recaptcha uses file_get_contents to retrive data
+- gh#131: Allow override of reCAPTCHA request method (cf. issue #130)
+- gh#132: Fix travis builds for php 7.0 and 7.1
+- gh#138: sendtoken.php send http instead of https
+- gh#142: Move $debug config to the top of the file
+- gh#143: Warn when key phrase is not set
+- gh#144: Invalid Token error
+- gh#148: Change key feature never notifies
 * Mon Oct 17 2016 - Clement Oudot <clem@ltb-project.org> - 1.0-2
 - Fix packaging of lib/ directory
 * Fri Oct 14 2016 - Clement Oudot <clem@ltb-project.org> - 1.0-1

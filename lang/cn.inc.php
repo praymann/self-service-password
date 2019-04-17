@@ -25,6 +25,7 @@
 $messages['phpupgraderequired'] = "PHP upgrade required";
 $messages['nophpldap'] = "使用该工具需要安装PHP-Ldap";
 $messages['nophpmhash'] = "使用Samba模式需要安装PHP mhash";
+$messages['nokeyphrase'] = "Token encryption requires a random string in keyphrase setting";
 $messages['ldaperror'] = "无法访问LDAP目录";
 $messages['loginrequired'] = "请先登录";
 $messages['oldpasswordrequired'] = "需要输入旧密码";
@@ -77,6 +78,7 @@ $messages['changehelptoken'] = "<a href=\"?action=sendtoken\">使用邮件重置
 $messages['resetmessage'] = "您好 {login},\n\n点击这里重置密码:\n{url}\n\n如果您没有提交这个请求则忽略。";
 $messages['resetsubject'] = "重置密码";
 $messages['sendtokenhelp'] = "输入账户和邮件地址重置密码，点击发送邮件。";
+$messages['sendtokenhelpnomail'] = "输入账户重置密码，点击发送邮件。";
 $messages['mail'] = "电子邮件";
 $messages['mailrequired'] = "需要邮箱地址";
 $messages['mailnomatch'] = "输入的邮箱地址不是该账号的注册地址";
@@ -117,5 +119,15 @@ $messages['emptysetquestionsform'] = "Set your password reset questions";
 $messages['emptysendsmsform'] = "Get a reset code";
 $messages['sameaslogin'] = "Your new password is identical to your login";
 $messages['policydifflogin'] = "Your new password may not be the same as your login";
-
-?>
+$messages['menusshkey'] = "SSH密钥";
+$messages['changesshkeysubject'] = "您的SSH密钥已更改";
+$messages['sshkey'] = "SSH密钥";
+$messages['changehelpsshkey'] = "<a href=\"?action=changesshkey\">更改SSH密钥</a>";
+$messages['emptysshkeychangeform'] = "更改SSH密钥";
+$messages['sshkeychanged'] = "您的SSH密钥已更改";
+$messages['sshkeyerror'] = "LDAP目录拒绝了SSH密钥";
+$messages['sshkeyrequired'] = "需要SSH密钥";
+$messages['changesshkeymessage'] = "您好{login},\n\n您的SSH金钥已变更。\n\n如果您没有启动这项变更，请立即与您的管理员联络。";
+$messages['changesshkeyhelp'] = "输入您的密码和新的SSH密钥。";
+$messages['pwned'] = "Your new password has already been published on leaks, you should consider changing it on any other service that it is in use";
+$messages['policypwned'] = "Your new password may not be published on any previous public password leak from any site";

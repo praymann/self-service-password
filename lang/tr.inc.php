@@ -25,6 +25,7 @@
 $messages['phpupgraderequired'] = "PHP upgrade required";
 $messages['nophpldap'] = "Bu aracı kullanabilmek için PHP LDAP yüklemelisiniz";
 $messages['nophpmhash'] = "Samba modunu kullanmak için PHP mhash yüklemelisiniz";
+$messages['nokeyphrase'] = "Token encryption requires a random string in keyphrase setting";
 $messages['ldaperror'] = "LDAP dizinine ulaşılamıyor";
 $messages['loginrequired'] = "Kullanıcı adınız gereklidir";
 $messages['oldpasswordrequired'] = "Eski parolanız gereklidir";
@@ -79,6 +80,7 @@ $messages['changehelpsms'] = "<a href=\"?action=sendsms\">SMS ile parolanızı s
 $messages['resetmessage'] = "Merhaba {login},\n\nParolanızı sıfırlamak için buraya tıklayın:\n{url}\n\nEğer parola sıfırlama talep etmediyseniz bu e-postayı dikkate almayın.";
 $messages['resetsubject'] = "Parolanızı sıfırlayın";
 $messages['sendtokenhelp'] = "Parolanızı sıfırlamak için kullanıcı adınızı ve e-posta adresinizi girin. İşlemi tamamlamak için e-postanın içindeki linke tıklayın.";
+$messages['sendtokenhelpnomail'] = "Parolanızı sıfırlamak için kullanıcı adınızı girin. İşlemi tamamlamak için e-postanın içindeki linke tıklayın.";
 $messages['mail'] = "E-posta adresi";
 $messages['mailrequired'] = "E-posta adresiniz gereklidir";
 $messages['mailnomatch'] = "E-posta adresi ile kullanıcı adı uyuşmuyor";
@@ -117,5 +119,15 @@ $messages['emptysetquestionsform'] = "Set your password reset questions";
 $messages['emptysendsmsform'] = "Get a reset code";
 $messages['sameaslogin'] = "Your new password is identical to your login";
 $messages['policydifflogin'] = "Your new password may not be the same as your login";
-
-?>
+$messages['changesshkeymessage'] = "Sayın {login}, \n\nSSH Anahtarınız değiştirildi. \n\nBu değişikliği başlatmadıysanız lütfen derhal yöneticinize başvurun.";
+$messages['menusshkey'] = "SSH Anahtarı";
+$messages['changehelpsshkey'] = "<a href=\"?action=changesshkey\">SSH Anahtarınızı değiştirin</a>";
+$messages['sshkeychanged'] = "SSH Anahtarınız değiştirildi";
+$messages['sshkeyrequired'] = "SSH Anahtarı gerekiyor";
+$messages['changesshkeysubject'] = "SSH Anahtarınız değiştirildi";
+$messages['sshkey'] = "SSH Anahtarı";
+$messages['emptysshkeychangeform'] = "SSH Anahtarınızı Değiştirin";
+$messages['changesshkeyhelp'] = "Parolanızı ve yeni SSH anahtarınızı girin.";
+$messages['sshkeyerror'] = "SSH Anahtarı LDAP dizini tarafından reddedildi";
+$messages['pwned'] = "Your new password has already been published on leaks, you should consider changing it on any other service that it is in use";
+$messages['policypwned'] = "Your new password may not be published on any previous public password leak from any site";

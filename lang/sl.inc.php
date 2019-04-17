@@ -25,6 +25,7 @@
 $messages['phpupgraderequired'] = "PHP upgrade required";
 $messages['nophpldap'] = "Namestiti morate PHP LDAP";
 $messages['nophpmhash'] = "Za način Samba morate namestiti PHP mhash";
+$messages['nokeyphrase'] = "Token encryption requires a random string in keyphrase setting";
 $messages['ldaperror'] = "Dostop do LDAP ni mogoč";
 $messages['loginrequired'] = "Vnesti morate uporabniško ime";
 $messages['oldpasswordrequired'] = "Morate vnesti staro geslo";
@@ -79,6 +80,7 @@ $messages['changehelpsms'] = "<a href=\"?action=sendsms\">Ponastavite geslo prek
 $messages['resetmessage'] = "Pozdravljeni, {login},\n\nKliknite tukaj, da ponastavite geslo:\n{url}\n\nČe niste zahtevali ponastavitve gesla, prezrite to sporočilo.";
 $messages['resetsubject'] = "Ponastavite geslo";
 $messages['sendtokenhelp'] = "Za ponastavitev gesla vnesite uporabniško ime in e-naslov. Ko dobite sporočilo, kliknite na povezavo.";
+$messages['sendtokenhelpnomail'] = "Za ponastavitev gesla vnesite uporabniško ime. Ko dobite sporočilo, kliknite na povezavo.";
 $messages['mail'] = "E-naslov";
 $messages['mailrequired'] = "E-naslov je zahtevan";
 $messages['mailnomatch'] = "E-naslov se ne ujema s podanim uporabniškim imenom";
@@ -110,12 +112,22 @@ $messages['menutoken'] = "Email";
 $messages['menusms'] = "SMS";
 $messages['nophpxml'] = "Namestiti morate PHP XML";
 $messages['tokenattempts'] = "Invalid token, try again";
-$messages['emptychangeform'] = "Change your password";
-$messages['emptysendtokenform'] = "Email a password reset link";
+$messages['emptychangeform'] = "Spremenite svoje geslo";
+$messages['emptysendtokenform'] = "Pošljite ponastavitveno povezavo za geslo";
 $messages['emptyresetbyquestionsform'] = "Reset your password";
 $messages['emptysetquestionsform'] = "Set your password reset questions";
 $messages['emptysendsmsform'] = "Get a reset code";
 $messages['sameaslogin'] = "Your new password is identical to your login";
 $messages['policydifflogin'] = "Your new password may not be the same as your login";
-
-?>
+$messages['changesshkeymessage'] = "Pozdravljeni {login}, \n\nKo SSH ključ je bil spremenjen. \n\nČe ni sprožila te spremembe, se takoj obrnite na skrbnika.";
+$messages['menusshkey'] = "SSH Key";
+$messages['changehelpsshkey'] = "<a href=\"?action=changesshkey\">Spreminjanje SSH Key</a>";
+$messages['sshkeychanged'] = "Vaš SSH ključ je bil spremenjen";
+$messages['sshkeyrequired'] = "SSH Key je potrebno";
+$messages['changesshkeysubject'] = "Vaš SSH ključ je bil spremenjen";
+$messages['sshkey'] = "SSH Key";
+$messages['emptysshkeychangeform'] = "Spreminjanje SSH ključ";
+$messages['changesshkeyhelp'] = "Vnesite geslo in nov ključ SSH.";
+$messages['sshkeyerror'] = "SSH Ključna je bila zavrnjena z imeniku LDAP";
+$messages['pwned'] = "Your new password has already been published on leaks, you should consider changing it on any other service that it is in use";
+$messages['policypwned'] = "Your new password may not be published on any previous public password leak from any site";

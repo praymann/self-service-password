@@ -26,6 +26,7 @@
 $messages['phpupgraderequired'] = "PHP upgrade required";
 $messages['nophpldap'] = "Для використання цієї програми Вам потрібно встановити PHP ldap";
 $messages['nophpmhash'] = "Для використання Samba режиму, спочатку встановіть PHP mhash";
+$messages['nokeyphrase'] = "Token encryption requires a random string in keyphrase setting";
 $messages['ldaperror'] = "Немає доступу до LDAP директорії";
 $messages['loginrequired'] = "Введіть Ваш логін";
 $messages['oldpasswordrequired'] = "Введіть Ваш старий пароль";
@@ -78,6 +79,7 @@ $messages['changehelptoken'] = "<a href=\"?action=sendtoken\">Скиньте В�
 $messages['resetmessage'] = "Шановний {login},\n\nКлацніть тут для скидання пароля:\n{url}\n\nЯкщо Ви не відправляли запит скидання пароля, будь ласка, проігноруйте цей лист.";
 $messages['resetsubject'] = "Скиньте Ваш пароль";
 $messages['sendtokenhelp'] = "Введіть ім'я користувача та адресу електронної пошти для відновлення пароля. Виконуйте інструкції вказані в електронному листі, щоб завершити скидання пароля.";
+$messages['sendtokenhelpnomail'] = "Введіть ім'я користувача для відновлення пароля. Виконуйте інструкції вказані в електронному листі, щоб завершити скидання пароля.";
 $messages['mail'] = "Електронна пошта";
 $messages['mailrequired'] = "Введіть вашу електрону пошту";
 $messages['mailnomatch'] = "Ваша електронна пошта не збігається з логіном";
@@ -118,5 +120,15 @@ $messages['emptysetquestionsform'] = "Set your password reset questions";
 $messages['emptysendsmsform'] = "Get a reset code";
 $messages['sameaslogin'] = "Your new password is identical to your login";
 $messages['policydifflogin'] = "Your new password may not be the same as your login";
-
-?>
+$messages['changesshkeymessage'] = "Привіт, {login} \n\nyour SSH ключ був змінений. \n\nЕслі ви не ініціювали ці зміни, зверніться до адміністратора негайно.";
+$messages['menusshkey'] = "SSH ключ";
+$messages['changehelpsshkey'] = "<a href=\"?action=changesshkey\">Змінити SSH Key</a>";
+$messages['sshkeychanged'] = "Ваш SSH ключ був змінений";
+$messages['sshkeyrequired'] = "SSH ключ необхідний";
+$messages['changesshkeysubject'] = "Ваш SSH ключ був змінений";
+$messages['sshkey'] = "SSH ключ";
+$messages['emptysshkeychangeform'] = "Змінити ключ SSH";
+$messages['changesshkeyhelp'] = "Введіть свій пароль і новий ключ SSH.";
+$messages['sshkeyerror'] = "SSH Key була відхилена каталогом LDAP";
+$messages['pwned'] = "Your new password has already been published on leaks, you should consider changing it on any other service that it is in use";
+$messages['policypwned'] = "Your new password may not be published on any previous public password leak from any site";

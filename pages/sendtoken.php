@@ -33,17 +33,13 @@ $userdn = "";
 $token = "";
 
 if (!$mail_address_use_ldap) {
-    if (isset($_POST["mail"]) and $_POST["mail"]) { $mail = $_POST["mail"]; }
+    if (isset($_POST["mail"]) and $_POST["mail"]) { $mail = strval($_POST["mail"]); }
      else { $result = "mailrequired"; }
 }
-if (isset($_REQUEST["login"]) and $_REQUEST["login"]) { $login = $_REQUEST["login"]; }
+if (isset($_REQUEST["login"]) and $_REQUEST["login"]) { $login = strval($_REQUEST["login"]); }
  else { $result = "loginrequired"; }
 if (! isset($_POST["mail"]) and ! isset($_REQUEST["login"]))
  { $result = "emptysendtokenform"; }
-
-# Strip slashes added by PHP
-$login = stripslashes_if_gpc_magic_quotes($login);
-$mail = stripslashes_if_gpc_magic_quotes($mail);
 
 # Check the entered username for characters that our installation doesn't support
 if ( $result === "" ) {
@@ -53,18 +49,8 @@ if ( $result === "" ) {
 #==============================================================================
 # Check reCAPTCHA
 #==============================================================================
-if ( $result === "" ) {
-    if ( $use_recaptcha ) {
-        $recaptcha = new \ReCaptcha\ReCaptcha($recaptcha_privatekey);
-        $resp = $recaptcha->verify($_POST['g-recaptcha-response'], $_SERVER['REMOTE_ADDR']);
-        if (!$resp->isSuccess()) {
-            $result = "badcaptcha";
-            error_log("Bad reCAPTCHA attempt with user $login");
-            foreach ($resp->getErrorCodes() as $code) {
-                error_log("reCAPTCHA error: $code");
-            }
-        }
-    }
+if ( $result === "" && $use_recaptcha ) {
+    $result = check_recaptcha($recaptcha_privatekey, $recaptcha_request_method, $_POST['g-recaptcha-response'], $login);
 }
 
 #==============================================================================
@@ -88,12 +74,14 @@ if ( $result === "" ) {
         $bind = ldap_bind($ldap);
     }
 
-    $errno = ldap_errno($ldap);
-    if ( $errno ) {
+    if ( !$bind ) {
         $result = "ldaperror";
-        error_log("LDAP - Bind error $errno (".ldap_error($ldap).")");
+        $errno = ldap_errno($ldap);
+        if ( $errno ) {
+            error_log("LDAP - Bind error $errno  (".ldap_error($ldap).")");
+        }
     } else {
-    
+
     # Search for user
     $ldap_filter = str_replace("{login}", $login, $ldap_filter);
     $search = ldap_search($ldap, $ldap_base, $ldap_filter);
@@ -112,7 +100,7 @@ if ( $result === "" ) {
         $result = "badcredentials";
         error_log("LDAP - User $login not found");
     } else {
-    
+
     # Compare mail values
     $mailValues = ldap_get_values($ldap, $entry, $mail_attribute);
     unset($mailValues["count"]);
@@ -199,8 +187,8 @@ if ( $result === "" ) {
         $reset_url = $method."://".$server_name.$script_name;
     }
 
-    $reset_url .= "?action=resetbytoken&token=$token";
-    
+    $reset_url .= "?action=resetbytoken&token=".urlencode($token);
+
     if ( !empty($reset_request_log) ) {
         error_log("Send reset URL $reset_url \n\n", 3, $reset_request_log);
     } else {
@@ -221,6 +209,7 @@ if ( $result === "" ) {
 #==============================================================================
 # HTML
 #==============================================================================
+if ( in_array($result, array($obscure_failure_messages)) ) { $result = "badcredentials"; }
 ?>
 
 <div class="result alert alert-<?php echo get_criticity($result) ?>">
@@ -233,7 +222,11 @@ if ( $result === "" ) {
 if ( $show_help ) {
     echo "<div class=\"help alert alert-warning\"><p>";
     echo "<i class=\"fa fa-fw fa-info-circle\"></i> ";
-    echo $messages["sendtokenhelp"];
+    if ( $mail_address_use_ldap ) {
+        echo $messages["sendtokenhelpnomail"];
+    } else {
+        echo $messages["sendtokenhelp"];
+    }
     echo "</p></div>\n";
 }
 ?>
@@ -245,7 +238,7 @@ if ( $show_help ) {
         <div class="col-sm-8">
             <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-fw fa-user"></i></span>
-                <input type="text" name="login" id="login" value="<?php echo htmlentities($login) ?>" class="form-control" placeholder="<?php echo $messages["login"]; ?>" />
+                <input type="text" name="login" id="login" value="<?php echo htmlentities($login) ?>" class="form-control" placeholder="<?php echo $messages["login"]; ?>" autocomplete="off" />
             </div>
         </div>
     </div>
@@ -255,7 +248,7 @@ if ( $show_help ) {
         <div class="col-sm-8">
             <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-fw fa-envelope-o"></i></span>
-                <input type="email" name="mail" id="mail" class="form-control" placeholder="<?php echo $messages["mail"]; ?>" />
+                <input type="email" name="mail" id="mail" class="form-control" placeholder="<?php echo $messages["mail"]; ?>" autocomplete="off" />
             </div>
         </div>
     </div>

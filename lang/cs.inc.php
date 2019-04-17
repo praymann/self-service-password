@@ -25,6 +25,7 @@
 $messages['phpupgraderequired'] = "PHP upgrade required";
 $messages['nophpldap'] = "Pro použití tohoto nástroje nainstalujte PHP LDAP";
 $messages['nophpmhash'] = "Pro použití režimu Samba nainstalujte PHP mhash";
+$messages['nokeyphrase'] = "Token encryption requires a random string in keyphrase setting";
 $messages['ldaperror'] = "Nelze se přihlásit k LDAP adresáři";
 $messages['loginrequired'] = "Je vyžadováno přihlašovací jméno";
 $messages['oldpasswordrequired'] = "Je vyžadováno staré heslo";
@@ -79,6 +80,7 @@ $messages['changehelpsms'] = "<a href=\"?action=sendsms\">Obnova hesla pomocí S
 $messages['resetmessage'] = "Dobrý den {login},\n\nKlikněte zde pro obnovu hesla:\n{url}\n\nPokud jste nepožadovali obnovu hesla, prosím ignorujte tuto zprávu.";
 $messages['resetsubject'] = "Obnovte své heslo";
 $messages['sendtokenhelp'] = "Zadejte vaše přihlašovací jméno a e-mail pro obnovu hesla. Po přijetí e-mailu klikněte na odkaz umístěný uvnitř e-mailu.";
+$messages['sendtokenhelpnomail'] = "Zadejte vaše přihlašovací jméno pro obnovu hesla. Po přijetí e-mailu klikněte na odkaz umístěný uvnitř e-mailu.";
 $messages['mail'] = "Pošta";
 $messages['mailrequired'] = "E-mailová adresa je povinná";
 $messages['mailnomatch'] = "E-mailová adresa neodpovídá zadanému uživatelskému jménu";
@@ -117,5 +119,15 @@ $messages['emptysetquestionsform'] = "Nastavte otázku pro obnovu hesla";
 $messages['emptysendsmsform'] = "Získat kód pro obnovu hesla";
 $messages['sameaslogin'] = "Vaše nové heslo je shodné s přihlašovacím jménem";
 $messages['policydifflogin'] = "Vaše nové heslo nesmí být stejné jako vaše přihlašovací jméno";
-
-?>
+$messages['changesshkeymessage'] = "Dobrý den, {login}\n\nVaše SSH klíč byl změněn.\n\nPokud jste nevznesli tuto změnu, obraťte se ihned na svého správce.";
+$messages['sshkeyrequired'] = "SSH klíč je vyžadováno";
+$messages['emptysshkeychangeform'] = "Změňte svůj SSH klíč";
+$messages['changesshkeyhelp'] = "Zadejte heslo a nové SSH klíč.";
+$messages['changehelpsshkey'] = "<a href=\"?action=changesshkey\">Změňte svůj SSH klíč</a>";
+$messages['changesshkeysubject'] = "Váš SSH klíč byl změněn";
+$messages['sshkeychanged'] = "Váš SSH klíč byl změněn";
+$messages['sshkeyerror'] = "SSH klíč byl odmítnut v adresáři LDAP";
+$messages['sshkey'] = "SSH klíč";
+$messages['menusshkey'] = "SSH klíč";
+$messages['pwned'] = "Your new password has already been published on leaks, you should consider changing it on any other service that it is in use";
+$messages['policypwned'] = "Your new password may not be published on any previous public password leak from any site";

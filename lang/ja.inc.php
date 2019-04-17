@@ -25,6 +25,7 @@
 $messages['phpupgraderequired'] = "PHP upgrade required";
 $messages['nophpldap'] = "このツールを使うにはPHP LDAPをインストールしてください";
 $messages['nophpmhash'] = "Sambaモードを使うにはPHP mhashをインストールしてください";
+$messages['nokeyphrase'] = "Token encryption requires a random string in keyphrase setting";
 $messages['ldaperror'] = "LDAPディレクトリーにアクセスできません";
 $messages['loginrequired'] = "ログインIDを入力してください";
 $messages['oldpasswordrequired'] = "現在のパスワードを入力してください";
@@ -79,6 +80,7 @@ $messages['changehelpsms'] = "<a href=\"?action=sendsms\">SMSでパスワード�
 $messages['resetmessage'] = "{login}さん\n\nパスワードをリセットするにはこのリンクをクリックしてください:\n{url}\n\nあなたがパスワードのリセットを要求していない場合、このメールは無視してください。";
 $messages['resetsubject'] = "パスワードのリセット";
 $messages['sendtokenhelp'] = "パスワードをリセットするにはログインIDとメールアドレスを入力してください。受信したメールに含まれるリンクをクリックすると、パスワードをリセットできます。";
+$messages['sendtokenhelpnomail'] = "パスワードをリセットするにはログインIDを入力してください。受信したメールに含まれるリンクをクリックすると、パスワードをリセットできます。";
 $messages['mail'] = "メールアドレス";
 $messages['mailrequired'] = "メールアドレスを入力してください";
 $messages['mailnomatch'] = "メールアドレスがログインIDのものと一致しません";
@@ -117,5 +119,15 @@ $messages['emptysetquestionsform'] = "秘密の質問の設定";
 $messages['emptysendsmsform'] = "SMSによるパスワードのリセット";
 $messages['sameaslogin'] = "パスワードとログインIDが同じです";
 $messages['policydifflogin'] = "ログインIDと異なる";
-
-?>
+$messages['changesshkeymessage'] = "こんにちは{login}、\n\nSSHキーが変更されました。\n\nこの変更を開始していない場合は、すぐに管理者に連絡してください。";
+$messages['menusshkey'] = "SSHキー";
+$messages['changehelpsshkey'] = "<a href=\"?action=changesshkey\">SSHキーを変更する</a>";
+$messages['sshkeychanged'] = "あなたのSSHキーが変更されました";
+$messages['sshkeyrequired'] = "SSHキーが必要です";
+$messages['changesshkeysubject'] = "あなたのSSHキーが変更されました";
+$messages['sshkey'] = "SSHキー";
+$messages['emptysshkeychangeform'] = "SSHキーを変更する";
+$messages['changesshkeyhelp'] = "パスワードと新しいSSHキーを入力してください。";
+$messages['sshkeyerror'] = "SSHキーがLDAPディレクトリによって拒否されました";
+$messages['pwned'] = "Your new password has already been published on leaks, you should consider changing it on any other service that it is in use";
+$messages['policypwned'] = "Your new password may not be published on any previous public password leak from any site";

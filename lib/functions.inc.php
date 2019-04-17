@@ -26,9 +26,42 @@ function make_ssha_password($password) {
     return $hash;
 }
 
+# Create SSHA256 password
+function make_ssha256_password($password) {
+    $salt = random_bytes(4);
+    $hash = "{SSHA256}" . base64_encode(pack("H*", hash('sha256', $password . $salt)) . $salt);
+    return $hash;
+}
+
+# Create SSHA384 password
+function make_ssha384_password($password) {
+    $salt = random_bytes(4);
+    $hash = "{SSHA384}" . base64_encode(pack("H*", hash('sha384', $password . $salt)) . $salt);
+    return $hash;
+}
+
+# Create SSHA512 password
+function make_ssha512_password($password) {
+    $salt = random_bytes(4);
+    $hash = "{SSHA512}" . base64_encode(pack("H*", hash('sha512', $password . $salt)) . $salt);
+    return $hash;
+}
+
 # Create SHA password
 function make_sha_password($password) {
     $hash = "{SHA}" . base64_encode(pack("H*", sha1($password)));
+    return $hash;
+}
+
+# Create SHA256 password
+function make_sha256_password($password) {
+    $hash = "{SHA256}" . base64_encode(pack("H*", hash('sha256', $password)));
+    return $hash;
+}
+
+# Create SHA384 password
+function make_sha384_password($password) {
+    $hash = "{SHA384}" . base64_encode(pack("H*", hash('sha384', $password)));
     return $hash;
 }
 
@@ -108,24 +141,14 @@ function generate_sms_token( $sms_token_length ) {
     return $smstoken;
 }
 
-# Strip slashes added by PHP
-# Only if magic_quote_gpc is not set to off in php.ini
-function stripslashes_if_gpc_magic_quotes( $string ) {
-    if(get_magic_quotes_gpc()) {
-        return stripslashes($string);
-    } else {
-        return $string;
-    }
-}
-
 # Get message criticity
 function get_criticity( $msg ) {
 
-    if ( preg_match( "/nophpldap|phpupgraderequired|nophpmhash|ldaperror|nomatch|badcredentials|passworderror|tooshort|toobig|minlower|minupper|mindigit|minspecial|forbiddenchars|sameasold|answermoderror|answernomatch|mailnomatch|tokennotsent|tokennotvalid|notcomplex|smsnonumber|smscrypttokensrequired|nophpmbstring|nophpxml|smsnotsent|sameaslogin/" , $msg ) ) {
+    if ( preg_match( "/nophpldap|phpupgraderequired|nophpmhash|nokeyphrase|ldaperror|nomatch|badcredentials|passworderror|tooshort|toobig|minlower|minupper|mindigit|minspecial|forbiddenchars|sameasold|answermoderror|answernomatch|mailnomatch|tokennotsent|tokennotvalid|notcomplex|smsnonumber|smscrypttokensrequired|nophpmbstring|nophpxml|smsnotsent|sameaslogin|pwned|sshkeyerror/" , $msg ) ) {
     return "danger";
     }
-	
-    if ( preg_match( "/(login|oldpassword|newpassword|confirmpassword|answer|question|password|mail|token)required|badcaptcha|tokenattempts/" , $msg ) ) {
+
+    if ( preg_match( "/(login|oldpassword|newpassword|confirmpassword|answer|question|password|mail|token|sshkey)required|badcaptcha|tokenattempts/" , $msg ) ) {
         return "warning";
     }
 
@@ -147,11 +170,11 @@ function get_fa_class( $msg) {
 # @return HTML code
 function show_policy( $messages, $pwd_policy_config, $result ) {
     extract( $pwd_policy_config );
-    
+
     # Should we display it?
     if ( !$pwd_show_policy or $pwd_show_policy === "never" ) { return; }
     if ( $pwd_show_policy === "onerror" ) {
-        if ( !preg_match( "/tooshort|toobig|minlower|minupper|mindigit|minspecial|forbiddenchars|sameasold|notcomplex|sameaslogin/" , $result) ) { return; }
+        if ( !preg_match( "/tooshort|toobig|minlower|minupper|mindigit|minspecial|forbiddenchars|sameasold|notcomplex|sameaslogin|pwned/" , $result) ) { return; }
     }
 
     # Display bloc
@@ -168,6 +191,7 @@ function show_policy( $messages, $pwd_policy_config, $result ) {
     if ( $pwd_forbidden_chars ) { echo "<li>".$messages["policyforbiddenchars"] ." $pwd_forbidden_chars</li>\n"; }
     if ( $pwd_no_reuse        ) { echo "<li>".$messages["policynoreuse"]                                 ."\n"; }
     if ( $pwd_diff_login      ) { echo "<li>".$messages["policydifflogin"]                               ."\n"; }
+    if ( $use_pwnedpasswords  ) { echo "<li>".$messages["policypwned"]                               ."\n"; }
     echo "</ul>\n";
     echo "</div>\n";
 }
@@ -176,7 +200,7 @@ function show_policy( $messages, $pwd_policy_config, $result ) {
 # @return result code
 function check_password_strength( $password, $oldpassword, $pwd_policy_config, $login ) {
     extract( $pwd_policy_config );
-    
+
     $result = "";
 
     $length = strlen(utf8_decode($password));
@@ -235,6 +259,15 @@ function check_password_strength( $password, $oldpassword, $pwd_policy_config, $
 
     # Same as login?
     if ( $pwd_diff_login and $password === $login ) { $result="sameaslogin"; }
+	
+	# pwned?
+	if ($use_pwnedpasswords) {
+		$pwned_passwords = new PwnedPasswords\PwnedPasswords;
+		
+		$insecure = $pwned_passwords->isInsecure($password);
+		
+		if($insecure) { $result="pwned"; }	
+	}
 
     return $result;
 }
@@ -280,8 +313,23 @@ function change_password( $ldap, $dn, $password, $ad_mode, $ad_options, $samba_m
         if ( $hash == "SSHA" ) {
             $password = make_ssha_password($password);
         }
+        if ( $hash == "SSHA256" ) {
+            $password = make_ssha256_password($password);
+        }
+        if ( $hash == "SSHA384" ) {
+            $password = make_ssha384_password($password);
+        }
+        if ( $hash == "SSHA512" ) {
+            $password = make_ssha512_password($password);
+        }
         if ( $hash == "SHA" ) {
             $password = make_sha_password($password);
+        }
+        if ( $hash == "SHA256" ) {
+            $password = make_sha256_password($password);
+        }
+        if ( $hash == "SHA384" ) {
+            $password = make_sha384_password($password);
         }
         if ( $hash == "SHA512" ) {
             $password = make_sha512_password($password);
@@ -324,7 +372,7 @@ function change_password( $ldap, $dn, $password, $ad_mode, $ad_options, $samba_m
     }
 
     # Commit modification on directory
-    
+
     # Special case: AD mode with password changed as user
     if ( $ad_mode and $who_change_password === "user" ) {
         # The AD password change procedure is modifying the attribute unicodePwd by
@@ -362,6 +410,31 @@ function change_password( $ldap, $dn, $password, $ad_mode, $ad_options, $samba_m
 
     return $result;
 }
+
+
+# Change sshPublicKey attribute
+# @return result code
+function change_sshkey( $ldap, $dn, $attribute, $sshkey ) {
+
+    $result = "";
+
+    $userdata[$attribute] = $sshkey;
+
+    # Commit modification on directory
+    $replace = ldap_mod_replace($ldap, $dn, $userdata);
+
+    $errno = ldap_errno($ldap);
+
+    if ( $errno ) {
+        $result = "sshkeyerror";
+        error_log("LDAP - Modify $attribute error $errno (".ldap_error($ldap).")");
+    } else {
+        $result = "sshkeychanged";
+    }
+
+    return $result;
+}
+
 
 /* @function encrypt(string $data)
  * Encrypt a data
@@ -413,7 +486,7 @@ function send_mail($mailer, $mail, $mail_from, $mail_from_name, $subject, $body,
     }
 
     /* Replace data in mail, subject and body */
-    foreach($data as $key => $value ) { 
+    foreach($data as $key => $value ) {
         $mail = str_replace('{'.$key.'}', $value, $mail);
         $mail_from = str_replace('{'.$key.'}', $value, $mail_from);
         $subject = str_replace('{'.$key.'}', $value, $subject);
@@ -463,4 +536,53 @@ function check_username_validity($username,$login_forbidden_chars) {
     return $result;
 }
 
-?>
+/* @function string check_recaptcha(string $recaptcha_privatekey, null|string $recaptcha_request_method, string $response, string $login)
+ * Check if $response verifies the reCAPTCHA by asking the recaptcha server, logs if errors
+ * @param $recaptcha_privatekey string shared secret with reCAPTCHA server
+ * @param $recaptcha_request_method null|string FQCN of request method, null for default
+ * @param $response string response provided by user
+ * @param $login string for logging purposes only
+ * @return string empty string if the response is verified successfully, else string 'badcaptcha'
+ */
+function check_recaptcha($recaptcha_privatekey, $recaptcha_request_method, $response, $login) {
+    $recaptcha = new \ReCaptcha\ReCaptcha($recaptcha_privatekey, is_null($recaptcha_request_method) ? null : new $recaptcha_request_method());
+    $resp = $recaptcha->verify($response, $_SERVER['REMOTE_ADDR']);
+
+    if (!$resp->isSuccess()) {
+        error_log("Bad reCAPTCHA attempt with user $login");
+        foreach ($resp->getErrorCodes() as $code) {
+            error_log("reCAPTCHA error: $code");
+        }
+        return 'badcaptcha';
+    }
+
+    return '';
+}
+/* @function string posthook_command(string $posthook, string  $login, string $newpassword, null|string $oldpassword, null|boolean $posthook_password_encodebase64)
+   Creates the command line to execute for the posthook process. Passwords will be base64 encoded if configured. Base64 encoding will prevent passwords with special 
+   characters to be modified by the escapeshellarg() function.
+   @param $postkook string script/command to execute for procesing posthook data
+   @param $login string username to change/set password for
+   @param $newpassword string new passwword for given login
+   @param $oldpassword string old password for given login
+   @param posthook_password_encodebase64 boolean set to true if passwords are to be converted to base64 encoded strings
+*/
+function posthook_command($posthook, $login, $newpassword, $oldpassword = null, $posthook_password_encodebase64 = false) {
+
+	$command = '';
+	if ( isset($posthook_password_encodebase64) && $posthook_password_encodebase64 ) {
+		$command = escapeshellcmd($posthook).' '.escapeshellarg($login).' '.base64_encode($newpassword);
+
+		if ( ! is_null($oldpassword) ) {
+			$command .= ' '.base64_encode($oldpassword);		
+		}
+
+	} else {		
+		$command = escapeshellcmd($posthook).' '.escapeshellarg($login).' '.escapeshellarg($newpassword);		
+
+		if ( ! is_null($oldpassword) ) {
+			$command .= ' '.escapeshellarg($oldpassword);		
+		}
+	}
+	return $command;
+}

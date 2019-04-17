@@ -25,6 +25,7 @@
 $messages['phpupgraderequired'] = "PHP upgrade required";
 $messages['nophpldap'] = "Devi installare PHP LDAP per usare questo strumento";
 $messages['nophpmhash'] = "Devi installare PHP mhash per usare il modo Samba";
+$messages['nokeyphrase'] = "Token encryption requires a random string in keyphrase setting";
 $messages['ldaperror'] = "Non posso accedere alla directory LDAP";
 $messages['loginrequired'] = "Nome utente obbligatorio";
 $messages['oldpasswordrequired'] = "Vecchia password obbligatoria";
@@ -77,6 +78,7 @@ $messages['changehelptoken'] = "<a href=\"?action=sendtoken\">Reimposta la tua p
 $messages['resetmessage'] = "Buongiorno {login},\n\nClicca qui per reimpostare la tua password:\n{url}\n\nSe non sei stato tu a richiedere il reset, per piacere ignora questa email.";
 $messages['resetsubject'] = "Reimposta la tua password";
 $messages['sendtokenhelp'] = "Inserisci la tua login e il tuo indirizzo email per reimpostare la tua password. Quindi clicca sul link che riceverai via mail.";
+$messages['sendtokenhelpnomail'] = "Inserisci la tua login per reimpostare la tua password. Quindi clicca sul link che riceverai via mail.";
 $messages['mail'] = "Mail";
 $messages['mailrequired'] = "Indirizzo mail obbligatorio";
 $messages['mailnomatch'] = "La mail non corrisponde al login";
@@ -117,5 +119,15 @@ $messages['emptysetquestionsform'] = "Imposta la domanda per il reset della pass
 $messages['emptysendsmsform'] = "Ottieni un codice di reset";
 $messages['sameaslogin'] = "La nuova password è identica all'utente di login";
 $messages['policydifflogin'] = "La nuova password non può essere uguale all'utente di login";
-
-?>
+$messages['changesshkeymessage'] = "Ciao {login}, \n\nIl SSH Key è stato modificato. \n\nSe non sei l'autore questo cambiamento, contattare immediatamente l'amministratore.";
+$messages['menusshkey'] = "SSH Key";
+$messages['changehelpsshkey'] = "<a href=\"?action=changesshkey\">Cambia la tua chiave SSH</a>";
+$messages['sshkeychanged'] = "La vostra chiave SSH è stata cambiata";
+$messages['sshkeyrequired'] = "è richiesto SSH Key";
+$messages['changesshkeysubject'] = "La vostra chiave SSH è stata modificata";
+$messages['sshkey'] = "SSH Key";
+$messages['emptysshkeychangeform'] = "Cambia la tua chiave SSH";
+$messages['changesshkeyhelp'] = "Inserire la password e la nuova chiave SSH.";
+$messages['sshkeyerror'] = "SSH Key è stata rifiutata dalla directory LDAP";
+$messages['pwned'] = "Your new password has already been published on leaks, you should consider changing it on any other service that it is in use";
+$messages['policypwned'] = "Your new password may not be published on any previous public password leak from any site";
